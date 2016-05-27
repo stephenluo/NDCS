@@ -1,0 +1,7 @@
+{
+  "URL_DIR": "file_loca\\url",
+  "DOWNLOAD_DIR": "file_loca\\download",
+  "PARSER_RESULT_DIR": "file_loca\\result",
+  "PARSER_RULE_DIR": "file_loca\\rule",
+  "LOG_DIR":""
+}
