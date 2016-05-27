@@ -11,8 +11,8 @@ import urllib.error
 import bs4.element
 from bs4 import BeautifulSoup
 
-
 # print(sys.getdefaultencoding())
+
 
 def get_element_count(chk_item: bs4.Tag) -> int:
     el_count = len(chk_item.find('p', class_='mt12').contents)
@@ -30,13 +30,13 @@ with open("../parser_conf.json", "r") as file:
     msg = json.load(file)
 
 # 取得文件目录
-urlPath = os.path.abspath('..') + "\\" + msg['URL_DIR']
-downloadPath = os.path.abspath('..') + "\\" + msg['DOWNLOAD_DIR']
-parserRulePath = os.path.abspath('..') + "\\" + msg['PARSER_RULE_DIR']
-parserResultPath = os.path.abspath('..') + "\\" + msg['PARSER_RESULT_DIR']
+urlPath = os.path.abspath('..') + os.sep + msg['URL_DIR']
+downloadPath = os.path.abspath('..') + os.sep + msg['DOWNLOAD_DIR']
+parserRulePath = os.path.abspath('..') + os.sep + msg['PARSER_RULE_DIR']
+parserResultPath = os.path.abspath('..') + os.sep + msg['PARSER_RESULT_DIR']
 
 # 解析规则文件
-dataRuleFilePath = parserRulePath + "\\" + "data_parser_rule.json"
+dataRuleFilePath = parserRulePath + os.sep + "data_parser_rule.json"
 with open(dataRuleFilePath, encoding='utf-8') as file:
     msg = json.load(file)
 
@@ -55,14 +55,14 @@ it = iter(listFile)
 
 # 遍历download文件
 for fileName in it:
-    filePath = downloadPath + "\\" + fileName
+    filePath = downloadPath + os.sep + fileName
     file = open(filePath, "r+")
 
     # 得到下载地址的Md5值
     url = file.readline()
     fileNameMd5 = get_md5(url)
 
-    parserResultFilePath = parserResultPath + "\\" + fileNameMd5 + ".json"
+    parserResultFilePath = parserResultPath + os.sep + fileNameMd5 + ".json"
 
     if os.path.exists(parserResultFilePath):
         continue
@@ -110,12 +110,12 @@ for fileName in it:
     #     print(item["items"]["estate_name"], item["items"]["room_type"], item["items"]["building_age"])
 
     # 抓取数据保存成json文件
-    parserResultFilePath = parserResultPath + "\\" + fileNameMd5 + ".json"
+    # parserResultFilePath = parserResultPath + os.sep + fileNameMd5 + ".json"
 
     encodeD = json.dumps(records, ensure_ascii=False)
-    with open(parserResultFilePath, 'w') as f:
+    with open(parserResultFilePath, 'w', encoding='utf-8') as f:
         f.write(encodeD)
 
-    print("--------------------------------------------------------------")
+print("----------------------------parser finished----------------------------------")
 file.seek(0, 0)
 file.close()
