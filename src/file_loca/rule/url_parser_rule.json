@@ -1,0 +1,9 @@
+{
+  "rule_name": "rule-2",
+  "action": "url",
+  "data_name": "urlInfo",
+  "list": "soup.find_all(id=re.compile('list_D03_\\d{2}'))",
+  "data":{
+    "url":""
+  }
+}
