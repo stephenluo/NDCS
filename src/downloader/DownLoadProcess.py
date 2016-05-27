@@ -44,7 +44,7 @@ def save_page(new_file, str_url, curr_page):
 
 
 # 得到md5值
-def get_md5(str_url):
+def get_md5(str_url: str):
     md5 = hashlib.new('md5')
     md5.update(str_url.encode("utf-8"))
     return md5.hexdigest()
