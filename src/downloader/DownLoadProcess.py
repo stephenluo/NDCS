@@ -88,7 +88,7 @@ for fileName in it:
             continue
         else:
             # 文件不存在则新建，并下载保存相关网页
-            newF = open(downloadFilePath, 'w')
+            newF = open(downloadFilePath, 'w', encoding='utf-8')
 
             # 下载网页
             second = random.random() * 10
