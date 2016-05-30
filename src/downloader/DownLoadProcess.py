@@ -61,8 +61,8 @@ with open("../downloader_conf.json", "r") as file:
     msg = json.load(file)
 
 # 取得文件目录
-urlPath = os.path.abspath('..') + "\\" + msg['URL_DIR']
-downloadPath = os.path.abspath('..') + "\\" + msg['DOWNLOAD_DIR']
+urlPath = os.path.abspath('..') + os.sep + msg['URL_DIR']
+downloadPath = os.path.abspath('..') + os.sep + msg['DOWNLOAD_DIR']
 
 # 取得url文件列表
 listFile = os.listdir(urlPath)
@@ -70,7 +70,7 @@ it = iter(listFile)
 
 #  遍历url文件
 for fileName in it:
-    filePath = urlPath + "\\" + fileName
+    filePath = urlPath + os.sep + fileName
     file = open(filePath, "r+", encoding='utf-8')
 
     lineNum = len(file.readlines())
@@ -82,7 +82,7 @@ for fileName in it:
 
         # 检查数据保存目录里是否存在已下载的网页文件
         fileNameMd5 = get_md5(url)
-        downloadFilePath = downloadPath + "\\" + fileNameMd5 + ".txt"
+        downloadFilePath = downloadPath + os.sep + fileNameMd5 + ".txt"
 
         if os.path.exists(downloadFilePath):
             continue
