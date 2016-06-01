@@ -64,37 +64,43 @@ with open("../downloader_conf.json", "r") as file:
 urlPath = os.path.abspath('..') + os.sep + msg['URL_DIR']
 downloadPath = os.path.abspath('..') + os.sep + msg['DOWNLOAD_DIR']
 
-# 取得url文件列表
-listFile = os.listdir(urlPath)
-it = iter(listFile)
+counter = 0
+while counter < 3:
+    # 取得url文件列表
+    listFile = os.listdir(urlPath)
+    it = iter(listFile)
 
-#  遍历url文件
-for fileName in it:
-    filePath = urlPath + os.sep + fileName
-    file = open(filePath, "r+", encoding='utf-8')
+    #  遍历url文件
+    for fileName in it:
+        filePath = urlPath + os.sep + fileName
+        file = open(filePath, "r+", encoding='utf-8')
 
-    lineNum = len(file.readlines())
-    file.seek(0, 0)
+        lineNum = len(file.readlines())
+        file.seek(0, 0)
 
-    # 遍历url地址
-    for index in range(lineNum):
-        url = str(next(file)).replace("\n", "")
+        # 遍历url地址
+        for index in range(lineNum):
+            url = str(next(file)).replace("\n", "")
 
-        # 检查数据保存目录里是否存在已下载的网页文件
-        fileNameMd5 = get_md5(url)
-        downloadFilePath = downloadPath + os.sep + fileNameMd5 + ".txt"
+            # 检查数据保存目录里是否存在已下载的网页文件
+            fileNameMd5 = get_md5(url)
+            downloadFilePath = downloadPath + os.sep + fileNameMd5 + ".txt"
 
-        if os.path.exists(downloadFilePath):
-            continue
-        else:
-            # 文件不存在则新建，并下载保存相关网页
-            newF = open(downloadFilePath, 'w', encoding='utf-8')
+            if os.path.exists(downloadFilePath):
+                continue
+            else:
+                # 文件不存在则新建，并下载保存相关网页
+                newF = open(downloadFilePath, 'w', encoding='utf-8')
 
-            # 下载网页
-            second = random.random() * 10
-            time.sleep(second)
-            page = download_page_by_url(url)
-            # 保存网页
-            save_page(newF, url, page)
+                # 下载网页
+                second = random.random() * 10
+                time.sleep(second)
+                page = download_page_by_url(url)
+                # 保存网页
+                save_page(newF, url, page)
+                # 重置
+                counter = 0
+        file.close()
+    counter += 1
 
-    file.close()
+print("----------------------------download finished----------------------------------")

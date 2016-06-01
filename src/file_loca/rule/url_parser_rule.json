@@ -2,8 +2,8 @@
   "rule_name": "rule-2",
   "action": "url",
   "data_name": "urlInfo",
-  "list": "soup.find_all(id=re.compile('list_D03_\\d{2}'))",
+  "list": "soup.find(id='list_D10_15')",
   "data":{
-    "url":""
+    "url": "dict(urlList.find('a', id='PageControl1_hlk_next').attrs)['href']"
   }
 }

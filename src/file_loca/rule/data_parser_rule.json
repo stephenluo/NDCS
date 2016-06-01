@@ -7,10 +7,14 @@
     "id": "dict(item.find('p', class_='mt10').find('a').attrs)['href']",
     "items":{
       "estate_name": "item.find('p', class_='mt10').find('a').find('span').string",
+      "estate_address": "item.find('p', class_='mt10').find('span', class_='iconAdress ml10 gray9').string",
       "room_type": "item.find('p', class_='mt12').contents[0].replace('\\n', '').replace(' ', '').replace('\\t', '')",
       "floor": "item.find('p', class_='mt12').contents[2].replace('\\n', '').replace(' ', '').replace('\\t', '')",
       "orientation": "item.find('p', class_='mt12').contents[4].replace('\\n', '').replace(' ', '').replace('\\t', '')",
-      "building_age": "item.find('p', class_='mt12').contents[6].replace('\\n', '').replace(' ', '').replace('\\t', '')"
+      "building_age": "item.find('p', class_='mt12').contents[6].replace('\\n', '').replace(' ', '').replace('\\t', '')",
+      "area": "item.find('div', class_='area alignR').find('p').string",
+      "total_price": "item.find('span', class_='price').string",
+      "unit_price": "item.find('p', class_='danjia alignR mt5').contents[0] + item.find('p', class_='danjia alignR mt5').contents[1].string + item.find('p', class_='danjia alignR mt5').contents[2]"
     }
   }
 }
