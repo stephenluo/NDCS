@@ -65,7 +65,7 @@ urlPath = os.path.abspath('..') + os.sep + msg['URL_DIR']
 downloadPath = os.path.abspath('..') + os.sep + msg['DOWNLOAD_DIR']
 
 counter = 0
-while counter < 3:
+while counter < 50:
     # 取得url文件列表
     listFile = os.listdir(urlPath)
     it = iter(listFile)
@@ -93,14 +93,16 @@ while counter < 3:
                 newF = open(downloadFilePath, 'w', encoding='utf-8')
 
                 # 下载网页
-                second = random.random() * 10
+                second = random.uniform(2, 6)
                 time.sleep(second)
                 page = download_page_by_url(url)
                 # 保存网页
                 save_page(newF, url, page)
                 # 重置
-                counter = 0
+                counter = -1
         file.close()
+    if counter > -1:
+        time.sleep(1)
     counter += 1
 
-print("----------------------------download finished----------------------------------")
+print("----------------------------【download finished】----------------------------------")

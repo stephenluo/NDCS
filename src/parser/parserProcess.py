@@ -9,6 +9,7 @@ import re
 import urllib.request
 import urllib.error
 import bs4.element
+import datetime
 from bs4 import BeautifulSoup
 import time
 
@@ -69,18 +70,26 @@ listCmdUrl = urlRule['list']
 urlCmd = urlRule['data']['url']
 
 counter = 0
-while counter < 3:
+while counter < 50:
     # 取得download文件列表
     listFile = os.listdir(downloadPath)
     it = iter(listFile)
 
     # 遍历download文件
     for fileName in it:
+        # url是否抓取标志
+        urlSeizeFlg = 1
+
         filePath = downloadPath + os.sep + fileName
         file = open(filePath, "r+", encoding='utf-8')
 
-        # 得到下载地址的Md5值
+        # 得到url
         url = file.readline()
+        if url == "":
+            continue
+        if url.replace("\n", "").endswith('100/'):
+            urlSeizeFlg = 0
+        # 得到下载地址的Md5值
         fileNameMd5 = get_md5(url)
 
         parserResultFilePath = parserResultPath + os.sep + fileNameMd5 + ".json"
@@ -93,8 +102,9 @@ while counter < 3:
             soup = BeautifulSoup(html, "html.parser")
 
             '''抓取数据url地址'''
-            urlList = eval(listCmdUrl)
-            nextPageUrl = prefixUrl + eval(urlCmd)
+            if urlSeizeFlg == 1:
+                urlList = eval(listCmdUrl)
+                nextPageUrl = prefixUrl + eval(urlCmd)
 
             '''抓取楼盘数据'''
             houseList = eval(listCmd)
@@ -146,15 +156,17 @@ while counter < 3:
         #     print(item["items"]["estate_name"], item["items"]["room_type"], item["items"]["building_age"])
 
         # url地址保存
-        FORMAT_DATE = '%Y%m%d%H%M'
-
-        urlFilePath = urlPath + os.sep + time.strftime(FORMAT_DATE) + ".txt"
-        if os.path.exists(urlFilePath):
-            file = open(urlFilePath, 'a', encoding='utf-8')
-        else:
-            file = open(urlFilePath, 'w', encoding='utf-8')
-        file.write(nextPageUrl)
-        file.write('\n')
+        if urlSeizeFlg == 1:
+            FORMAT_DATE = '%Y%m%d%H%M%S'
+            urlFilePath = urlPath + os.sep + time.strftime(FORMAT_DATE) + ".txt"
+            if os.path.exists(urlFilePath):
+                pass
+                # file = open(urlFilePath, 'a', encoding='utf-8')
+            else:
+                fileUrl = open(urlFilePath, 'w', encoding='utf-8')
+                fileUrl.write(nextPageUrl)
+                fileUrl.write('\n')
+                fileUrl.close()
 
         # 抓取数据保存
         encodeD = json.dumps(records, ensure_ascii=False)
@@ -162,9 +174,12 @@ while counter < 3:
             f.write(encodeD)
 
         # 重置
-        counter = 0
+        counter = -1
 
     file.seek(0, 0)
     file.close()
+
+    if counter > -1:
+        time.sleep(2)
     counter += 1
-print("----------------------------parser finished----------------------------------")
+print("----------------------------【parser finished】----------------------------------")
