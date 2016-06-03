@@ -4,7 +4,7 @@
   "data_name": "houseInfo",
   "list": "soup.find_all(id=re.compile('list_D03_\\d{2}'))",
   "data":{
-    "id": "dict(item.find('p', class_='mt10').find('a').attrs)['href']",
+    "id": "dict(item.find('p', class_='title').find('a').attrs)['href']",
     "items":{
       "estate_name": "item.find('p', class_='mt10').find('a').find('span').string",
       "estate_address": "item.find('p', class_='mt10').find('span', class_='iconAdress ml10 gray9').string",
