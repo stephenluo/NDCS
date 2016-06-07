@@ -86,7 +86,7 @@ def do_download(task_path, start_url):
     fileUrl.close()
 
     counter = 0
-    while counter < 5:
+    while counter < 10:
         # 取得url文件列表
         listFile = os.listdir(urlPath)
         it = iter(listFile)
@@ -119,6 +119,7 @@ def do_download(task_path, start_url):
                     page = download_page_by_url(url)
                     # 保存网页
                     save_page(newF, url, page)
+                    print("downloaded: {0}".format(url))
                     # 重置
                     counter = -1
             file.close()
@@ -126,7 +127,7 @@ def do_download(task_path, start_url):
             time.sleep(1)
         counter += 1
 
-        print("download")
+        # print("download")
     print("----------------------------【download finished】----------------------------------")
 
 

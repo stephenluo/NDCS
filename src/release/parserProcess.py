@@ -197,6 +197,7 @@ def do_parse(task_path, rule_path):
                 encodeD = json.dumps(records, ensure_ascii=False)
                 with open(parserResultFilePath, 'w', encoding='utf-8') as f:
                     f.write(encodeD)
+                print("parsed: {0}".format(url.replace('\n', '')))
 
                 # 重置
                 counter = -1
@@ -207,8 +208,6 @@ def do_parse(task_path, rule_path):
             if counter > -1:
                 time.sleep(2)
             counter += 1
-
-            print("parse")
         except Exception as err:
             counter += 1
             print("global error: {0}".format(err))
@@ -226,4 +225,3 @@ rulePath = sys.argv[2]
 
 # 执行解析器
 do_parse(taskPath, rulePath)
-
