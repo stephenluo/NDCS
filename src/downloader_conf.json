@@ -1,5 +1,6 @@
 {
-  "URL_DIR": "file_loca/url",
-  "DOWNLOAD_DIR": "file_loca/download",
-  "LOG_DIR":""
+  "URL_DIR": "url",
+  "DOWNLOAD_DIR": "download",
+  "LOG_DIR":"",
+  "START_URL": "http://esf.sh.fang.com/house/i361/"
 }
