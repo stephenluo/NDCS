@@ -13,6 +13,7 @@ import datetime
 from bs4 import BeautifulSoup
 import time
 
+
 # print(sys.getdefaultencoding())
 
 # url地址前缀
@@ -140,11 +141,35 @@ def do_parse(task_path, rule_path):
 
                             # 得到子元素的数量
                             elCount = get_element_count(item)
-
                             roomType = eval(roomTypeCmd) if elCount > 0 else ''
-                            floor = eval(floorCmd) if elCount > 2 else ''
-                            orientation = eval(orientationCmd) if elCount > 4 else ''
-                            buildingAge = eval(buildingAgeCmd) if elCount > 6 else ''
+                            floor = ''
+                            orientation = ''
+                            buildingAge = ''
+
+                            # 检查楼层，朝向和建筑年代是否存在
+                            tmpData = eval(floorCmd) if elCount > 2 else ''
+                            if get_field_name(tmpData) == 'floor':
+                                floor = tmpData
+                            elif get_field_name(tmpData) == 'orientation':
+                                orientation = tmpData
+                            elif get_field_name(tmpData) == 'building_age':
+                                buildingAge = tmpData
+
+                            tmpData = eval(orientationCmd) if elCount > 4 else ''
+                            if get_field_name(tmpData) == 'floor':
+                                floor = tmpData
+                            elif get_field_name(tmpData) == 'orientation':
+                                orientation = tmpData
+                            elif get_field_name(tmpData) == 'building_age':
+                                buildingAge = tmpData
+
+                            tmpData = eval(buildingAgeCmd) if elCount > 6 else ''
+                            if get_field_name(tmpData) == 'floor':
+                                floor = tmpData
+                            elif get_field_name(tmpData) == 'orientation':
+                                orientation = tmpData
+                            elif get_field_name(tmpData) == 'building_age':
+                                buildingAge = tmpData
 
                             area = eval(areaCmd)
                             totalPrice = eval(totalPriceCmd) + "万"
@@ -171,14 +196,6 @@ def do_parse(task_path, rule_path):
                         items["unit_price"] = unitPrice
                         record["items"] = items
                         records.append(record)
-
-                # 文件读取(test)
-                # parserResultFilePath = parserResultPath + "\\" + fileNameMd5 + ".json"
-                # with open(parserResultFilePath, "r") as file1:
-                #     msg = json.load(file1)
-                # for item in msg:
-                #     print(item["data_name"], item["id"])
-                #     print(item["items"]["estate_name"], item["items"]["room_type"], item["items"]["building_age"])
 
                 # url地址保存
                 if urlSeizeFlg == 1:
@@ -216,11 +233,25 @@ def do_parse(task_path, rule_path):
     print("----------------------------【parser finished】----------------------------------")
 
 
+def get_field_name(value: str) -> str:
+    if value == '':
+        return ''
+
+    if value.endswith('层'):
+        return 'floor'
+    elif value.endswith('向'):
+        return 'orientation'
+    else:
+        return 'building_age'
+
+
+
+
 # 接收参数
 taskPath = sys.argv[1]
 rulePath = sys.argv[2]
 
-# taskPath = 'D:/task/20160607110009'
+# taskPath = 'D:/task/20160613111111'
 # rulePath = 'D:\\PycharmProjects\\NDCS\\src\\rule'
 
 # 执行解析器
