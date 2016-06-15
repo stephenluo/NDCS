@@ -10,6 +10,9 @@ def do_data_insert(task_path, parse_time):
     with open("../parser_conf.json", "r") as cfgFile:
         cfgMsg = json.load(cfgFile)
 
+    with open("../db_conf.json", "r") as dbCfgFile:
+        dbMsg = json.load(dbCfgFile)
+
     # 解析结果文件读取
     parserResultFilePath = task_path + os.sep + parse_time + os.sep + cfgMsg['PARSER_RESULT_DIR']
     # 得到同批次所有文件
@@ -17,8 +20,10 @@ def do_data_insert(task_path, parse_time):
     it = iter(listFile)
 
     # 得到数据库连接对象,游标对象
-    conn = DBHelper.get_connection()
+    conn = DBHelper.get_connection(dbMsg)
     cursor = DBHelper.get_cursor(conn)
+
+    tableName = dbMsg['TABLE_NAME']
 
     # 遍历解析后数据文件
     for fileName in it:
@@ -28,7 +33,7 @@ def do_data_insert(task_path, parse_time):
 
         for item in estateList:
             # 得到增加楼盘的sql
-            insertSql = get_insert_sql(item, parse_time)
+            insertSql = get_insert_sql(tableName, item, parse_time)
             try:
                 # 插入一条楼盘数据
                 cursor.execute(insertSql)
@@ -39,11 +44,12 @@ def do_data_insert(task_path, parse_time):
                 print("插入数据error: {0}".format(err))
     conn.close()
     print("----------------------------【data insert finished】----------------------------------")
+    input()
 
 
 # 得到插入sql语句
-def get_insert_sql(e_info, time):
-    insertSql = "insert into estate_data values('{0:s}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}')" \
+def get_insert_sql(table_name, e_info, time):
+    insertSql = "insert into {11} values('{0:s}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}')" \
         .format(e_info['id'],
                 time,
                 e_info['items']['estate_name'],
@@ -54,7 +60,8 @@ def get_insert_sql(e_info, time):
                 e_info['items']['room_type'],
                 e_info['items']['floor'],
                 e_info['items']['orientation'],
-                e_info['items']['building_age']
+                e_info['items']['building_age'],
+                table_name
                 )
     return insertSql
 
@@ -64,8 +71,8 @@ def get_insert_sql(e_info, time):
 
 class DBHelper:
     @staticmethod
-    def get_connection() -> pymssql.Connection:
-        conn = pymssql.connect(server='172.28.70.68', user='sa', password='1qaz!QAZ', database='DB_DC_LEJU_DATA')
+    def get_connection(db_cfg) -> pymssql.Connection:
+        conn = pymssql.connect(db_cfg['SERVER'], db_cfg['USER'], db_cfg['PASSWORD'], db_cfg['DATABASE'])
         return conn
 
     @staticmethod

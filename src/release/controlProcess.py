@@ -15,7 +15,6 @@ def getplatform():
 rootPath = sys.argv[1]
 startUrl = sys.argv[2]
 rulePath = sys.argv[3]
-waitMinutes = sys.argv[4]
 
 # 创建任务文件目录
 FORMAT_DATE = '%Y%m%d%H%M%S'
@@ -25,15 +24,14 @@ if not os.path.exists(taskPath):
     os.mkdir(taskPath)
 
 if getplatform() == 'Windows':
-    # 执行下载和解析数据
+    # 下载数据
     os.system('start python DownLoadProcess.py {0} {1}'.format(taskPath, startUrl))
-    os.system('start python parserProcess.py {0} {1}'.format(taskPath, rulePath))
 else:
     os.system('python DownLoadProcess.py {0} {1} &'.format(taskPath, startUrl))
-    os.system('python parserProcess.py {0} {1} &'.format(taskPath, rulePath))
 
-# 等待一段时间后做数据插入
-time.sleep(waitMinutes * 60)
+# 解析数据
+os.system('python parserProcess.py {0} {1}'.format(taskPath, rulePath))
+# 保存到数据库
 os.system('python dataInsertProcess.py {0} {1}'.format(rootPath, parseTime))
 
 
