@@ -17,7 +17,7 @@ import time
 # print(sys.getdefaultencoding())
 
 # url地址前缀
-prefixUrl = "http://esf.sh.fang.com"
+# prefixUrl = "http://esf.sh.fang.com"
 
 
 # 取得标签子元素的数量
@@ -118,6 +118,9 @@ def do_parse(task_path, rule_path):
                     if urlSeizeFlg == 1:
                         try:
                             urlList = eval(listCmdUrl)
+                            # 取下一页的地址
+                            endIndex = url.index('/house')
+                            prefixUrl = url[0: endIndex]
                             nextPageUrl = prefixUrl + eval(urlCmd)
                         except Exception as err:
                             print("解析url地址时error: {0}".format(err))
