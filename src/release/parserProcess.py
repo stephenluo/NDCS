@@ -82,7 +82,7 @@ def do_parse(task_path, rule_path):
     nextPageUrl = ""
 
     counter = 0
-    while counter < 10:
+    while counter < 20:
         try:
             # 取得download文件列表
             listFile = os.listdir(downloadPath)
@@ -226,12 +226,12 @@ def do_parse(task_path, rule_path):
                 file.close()
 
             if counter > -1:
-                time.sleep(2)
+                time.sleep(3)
             counter += 1
         except Exception as err:
             counter += 1
             print("global error: {0}".format(err))
-            time.sleep(1)
+            time.sleep(2)
 
     print("----------------------------【parser finished】----------------------------------")
 

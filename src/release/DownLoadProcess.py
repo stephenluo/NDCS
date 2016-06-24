@@ -40,6 +40,23 @@ def download_page_by_url(str_url):
     return curr_page
 
 
+# 下载网页函数(用代理方式)
+def download_page_by_proxy(str_url):
+    proxy_handler = urllib.request.ProxyHandler({'http': '122.96.59.105:81'})
+    opener = urllib.request.build_opener(urllib.request.HTTPHandler, proxy_handler)
+    rsp = opener.open(str_url)
+    byte_html = rsp.read()
+
+    if rsp.info().get('content-encoding') == 'gzip':
+        out_data = io.BytesIO(byte_html)
+        gf = gzip.GzipFile(fileobj=out_data, mode='rb')
+        curr_page = gf.read().decode('gbk')
+    else:
+        curr_page = byte_html.decode('gbk')
+    opener.close()
+    return curr_page
+
+
 # 保存网页函数
 def save_page(new_file, str_url, curr_page):
     # print("文件名: ",  newFile.name)
@@ -110,13 +127,23 @@ def do_download(task_path, start_url):
                 if os.path.exists(downloadFilePath):
                     continue
                 else:
+                    # 下载网页
+                    second = random.uniform(1, 5)
+                    time.sleep(second)
+
+                    # 普通方式下载
+                    # page = download_page_by_url(url)
+
+                    # 代理方式下载
+                    try:
+                        page = download_page_by_proxy(url)
+                    except Exception as err:
+                        print("proxy download error: {0}".format(err))
+                        continue
+
                     # 文件不存在则新建，并下载保存相关网页
                     newF = open(downloadFilePath, 'w', encoding='utf-8')
 
-                    # 下载网页
-                    second = random.uniform(2, 6)
-                    time.sleep(second)
-                    page = download_page_by_url(url)
                     # 保存网页
                     save_page(newF, url, page)
                     print("downloaded: {0}".format(url))
@@ -125,15 +152,19 @@ def do_download(task_path, start_url):
             file.close()
         if counter > -1:
             time.sleep(1)
+        print('try {0}'.format(counter))
         counter += 1
 
         # print("download")
-    print("----------------------------【download finished】----------------------------------")
-
+    print("----------------------------download finished----------------------------------")
+    input()
 
 # 接收参数
 taskPath = sys.argv[1]
 startUrl = sys.argv[2]
+
+# taskPath = 'D:\\task\\xian\\20160623173824'
+# startUrl = 'http://esf.xian.fang.com/house/i398'
 
 # 执行下载器
 do_download(taskPath, startUrl)
