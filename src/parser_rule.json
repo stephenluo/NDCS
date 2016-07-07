@@ -1,0 +1,14 @@
+{
+  "rule_name": "rule-1",
+  "action": "data",
+  "data_name": "houseInfo",
+  "list": "soup.find_all(id=re.compile('list_D03_\\d{2}'))",
+  "data":{
+    "id": "dict(item.find('p', class_='mt10').find('a').attrs)['href']",
+    "items":{
+      "字段名1":"",
+      "字段名2":""
+    },
+    "url":""
+  }
+}

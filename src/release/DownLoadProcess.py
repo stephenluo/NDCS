@@ -11,13 +11,53 @@ import urllib.parse, urllib.error
 import gzip
 import time
 import random
-
+import socket
 import sys
 
 default_encoding = 'utf-8'
+
+
 # if sys.getdefaultencoding() != default_encoding:
 # reload(sys)
 # sys.setdefaultencoding(default_encoding)
+
+
+class SocketService:
+    # IP和端口
+    HOST = '172.28.70.71'
+    PORT = 9999
+
+    @staticmethod
+    def get_socket():
+        # 创建客户端socket对象
+        sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # 连接服务，指定主机和端口
+        sk.connect((SocketService.HOST, SocketService.PORT))
+        return sk
+
+
+# 与代理账号Server交互
+def request_for_server(req_info):
+    tryTimes = 0
+    while tryTimes < 3:
+        # 得到socket
+        client = SocketService.get_socket()
+
+        # 发送信息请求服务端（key 1表示账号分配，2表示账号返还，-1表示账号更换）
+        client.send(req_info.encode('utf-8'))
+
+        # 接收小于1024 字节的数据
+        rspMsg = client.recv(1024)
+
+        if rspMsg.decode('utf-8') == '0':
+            print('no account available, please try again later')
+            time.sleep(10)
+            tryTimes += 1
+            req_info = "1,"
+            client.close()
+            continue
+        tryTimes = 3
+    return rspMsg.decode('utf-8')
 
 
 # 下载网页函数 
@@ -41,8 +81,8 @@ def download_page_by_url(str_url):
 
 
 # 下载网页函数(用代理方式)
-def download_page_by_proxy(str_url):
-    proxy_handler = urllib.request.ProxyHandler({'http': '122.96.59.105:81'})
+def download_page_by_proxy(str_url, proxy_ip):
+    proxy_handler = urllib.request.ProxyHandler({'http': proxy_ip})
     opener = urllib.request.build_opener(urllib.request.HTTPHandler, proxy_handler)
     rsp = opener.open(str_url)
     byte_html = rsp.read()
@@ -102,8 +142,29 @@ def do_download(task_path, start_url):
     fileUrl.write('\n')
     fileUrl.close()
 
+    # 下载错误次数
+    downloadErrorTimes = 0
+
+    # 代理账号请求分配
+    proxy_ip = request_for_server("1,")
+    if proxy_ip == '0':
+        print("----------------------------no account, download unfinished----------------------------------")
+        return
+    else:
+        print('account assigned : ' + proxy_ip)
     counter = 0
     while counter < 10:
+        if downloadErrorTimes >= 3:
+            # 代理账号下载多次失败后请求更换
+            proxy_ip = request_for_server("-1," + proxy_ip)
+            if proxy_ip == '0':
+                print("----------------------------no account, download unfinished----------------------------------")
+                return
+            else:
+                print('account assigned : ' + proxy_ip)
+                downloadErrorTimes = 0
+                counter = -1
+
         # 取得url文件列表
         listFile = os.listdir(urlPath)
         it = iter(listFile)
@@ -136,9 +197,12 @@ def do_download(task_path, start_url):
 
                     # 代理方式下载
                     try:
-                        page = download_page_by_proxy(url)
+                        # proxy_ip = '106.38.251.62:8088'
+
+                        page = download_page_by_proxy(url, proxy_ip)
                     except Exception as err:
                         print("proxy download error: {0}".format(err))
+                        downloadErrorTimes += 1
                         continue
 
                     # 文件不存在则新建，并下载保存相关网页
@@ -149,26 +213,26 @@ def do_download(task_path, start_url):
                     print("downloaded: {0}".format(url))
                     # 重置
                     counter = -1
+                    downloadErrorTimes = 0;
             file.close()
         if counter > -1:
             time.sleep(1)
         print('try {0}'.format(counter))
         counter += 1
 
-        # print("download")
+    # 代理账号归还
+    rspMsg = request_for_server("2," + proxy_ip)
+    print(rspMsg)
     print("----------------------------download finished----------------------------------")
-    input()
+
 
 # 接收参数
 taskPath = sys.argv[1]
 startUrl = sys.argv[2]
 
-# taskPath = 'D:\\task\\xian\\20160623173824'
+# taskPath = 'D:\\task\\xian\\20160628093542'
 # startUrl = 'http://esf.xian.fang.com/house/i398'
 
 # 执行下载器
 do_download(taskPath, startUrl)
-
-
-
-
+input()
