@@ -3,7 +3,6 @@
 import hashlib
 import json
 import io
-import urllib.parse, urllib.error, urllib.request
 import httplib2
 import gzip
 import time
@@ -13,6 +12,7 @@ import os
 import platform
 import re
 from bs4 import BeautifulSoup
+import urllib
 
 def download_page_by_url(str_url):
     #print('start download ...')
@@ -35,12 +35,22 @@ def download_page_by_url(str_url):
 
     h = httplib2.Http(timeout=30)
     finish_get = False
+    retry = 5
+    #str_url = re.match('^(.*\?)(.*)', str_url).group(1) + urllib.parse.quote_plus(re.match('^(.*\?)(.*)', str_url).group(2))
+    str_url = str_url.replace(' ','%20')
     while (not finish_get) :
         try:
+            #print('downloading %s' % str_url)
             resp, content = h.request(str_url,headers=header)
             finish_get = True
         except:
             print('get fail : %s' % str_url)
+            retry = retry - 1
+            if (retry<=0) :
+                raise
+
+            second = random.uniform(10, 20)
+            time.sleep(second)
     #print('get ...')
     try:
         curr_page = content.decode('gb18030')
@@ -84,17 +94,17 @@ def download_or_cache(filePath, url):
     #print ('start download_or_cache ...')
     page = None;
     if os.path.exists(filePath):
-        print('loading ...')
+        #print('loading ...')
         file = open(filePath, "r+", encoding='utf-8')
         url = file.readline()
         page = file.read()
         file.close()
     else:
-        print('downloading ...')
+        #print('downloading ...')
         page = download_page_by_url(url);
         #print('new file ...')
         newF = open(filePath, 'w', encoding='utf-8')
-        print('saving ...')
+        #print('saving ...')
         save_page(newF, url, page)
     #print ('end download_or_cache .')
     return page
@@ -115,7 +125,7 @@ downloadHUrlList = []
 
 while len(downloadUrlList)>0 :
     dUrl = downloadUrlList.pop();
-    print ('list page : %s'%dUrl)
+    print ('list page (%d : %s) : %s'%(len(downloadUrlList)+1,get_md5(dUrl),dUrl))
     downloadFilePath = 'listPages' + os.sep + get_md5(dUrl) + ".txt"
     page = download_or_cache(downloadFilePath,dUrl)
 
@@ -146,9 +156,10 @@ while len(downloadUrlList)>0 :
                 dataList.insert(0, get_md5(prjUrl))
                 downloadPrjUrlList.append(prjUrl)
 
-        print(dataList)
+        print(dataList) # 项目数据: projectID,......
+
         dpUrl = downloadPrjUrlList.pop()
-        print('project page : %s' % dpUrl)
+        print('project page (%d - %d : %s) : %s' % (len(downloadUrlList)+1,len(downloadPrjUrlList)+1,get_md5(dpUrl),dpUrl))
         downloadPrjFilePath = 'prjPages' + os.sep + get_md5(dpUrl) + ".txt"
         page2 = download_or_cache(downloadPrjFilePath, dpUrl)
 
@@ -165,10 +176,19 @@ while len(downloadUrlList)>0 :
                 sbUrl = get_href(suUrl, data_item3['href'])
                 downloadBldUrlList.append(sbUrl)
 
-            print('start download building page ...')
+                data_base3 = data_item3.parent.parent
+                dataList3 = []
+                dataList3.insert(0, get_md5(dpUrl))
+                dataList3.insert(0, get_md5(sbUrl))
+                for sibling3 in data_base3.find_all('td'):
+                    if (sibling3.string != None):
+                        dataList3.append(sibling3.string)
+                print(dataList3) #预售证数据: salePermitID,projectID,......
+
+            #print('start download building page ...')
             while len(downloadBldUrlList)>0 :
                 sbUrl = downloadBldUrlList.pop()
-                print('project building page : %s' % sbUrl)
+                print('project building page (%d - %d - %d : %s) : %s' % (len(downloadUrlList)+1,len(downloadPrjUrlList)+1,len(downloadBldUrlList)+1,get_md5(sbUrl),sbUrl))
                 downloadSBFilePath = 'sbPages' + os.sep + get_md5(sbUrl) + ".txt"
                 page4 = download_or_cache(downloadSBFilePath, sbUrl)
 
@@ -177,16 +197,27 @@ while len(downloadUrlList)>0 :
                     hUrl = get_href(sbUrl, data_item4['href'])
                     downloadHUrlList.append(hUrl)
 
-                print('start download house page ...')
+                    data_base4 = data_item4.parent.parent
+                    dataList4 = []
+                    dataList4.insert(0, get_md5(dpUrl))
+                    dataList4.insert(0, get_md5(sbUrl))
+                    dataList4.insert(0, get_md5(hUrl))
+                    for sibling4 in data_base4.find_all('td'):
+                        if (sibling4.string != None):
+                            dataList4.append(sibling4.string)
+                    print(dataList4) #楼栋数据: buildingID,salePermitID,projectID,......
+
+                #print('start download house page ...')
                 while len(downloadHUrlList)>0 :
-                    print(len(downloadHUrlList))
                     hUrl = downloadHUrlList.pop()
-                    print('House page : %s' % hUrl)
+                    print('House page (%d - %d - %d - %d : %s) : %s' % (len(downloadUrlList)+1,len(downloadPrjUrlList)+1,len(downloadBldUrlList)+1,len(downloadHUrlList)+1,get_md5(hUrl),hUrl))
                     downloadHFilePath = 'housePages' + os.sep + get_md5(hUrl) + ".txt"
                     page5 = download_or_cache(downloadHFilePath, hUrl)
 
-                    #soup5 = BeautifulSoup(page5, "html.parser")
-                print('end download house page .')
-            print('end download building page .')
+                    soup5 = BeautifulSoup(page5, "html.parser")
+
+
+                #print('end download house page .')
+            #print('end download building page .')
 
 print('---end---')
